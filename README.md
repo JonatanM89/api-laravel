@@ -1,5 +1,5 @@
-# LaravelCadastro
-Cadastro básico de cliente em Laravel
+# API
+API básica desenvolvida em LARAVEL
 
 # Install & run (Windows)
  
