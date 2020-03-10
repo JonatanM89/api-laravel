@@ -30,10 +30,10 @@ Para execução da API, seguir os seguintes comandos
 
 
 # Routes
- GET | cidadao 
- GET | cidadao/:cpf 
- POST | cidadao
- POST | cidadao/:cpf 
- DELETE | cidadao/:cpf 
+ - GET | cidadao 
+ - GET | cidadao/:cpf 
+ - POST | cidadao
+ - POST | cidadao/:cpf 
+ - DELETE | cidadao/:cpf 
 
  
