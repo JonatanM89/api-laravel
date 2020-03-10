@@ -12,44 +12,27 @@ use App\Http\Controllers\ResponseObject;
 
 class CidadaoController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
         $cidadao = Cidadao::orderBy('nome')->get();
-        return response()->json($cidadao);
+        return response()->json($cidadao,200);
     }
 
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request, $cpf = 0)
     {   
-        if($cpf !=0){
-            return response()->json('EDITANDO');
-        }
-
+        $is_edit =  $cpf == 0 ? false : true;
         $response = new ResponseObject;
         
-        $validator = Validator::make($request->json()->all(), [
+        $validator = !$is_edit ? Validator::make($request->json()->all(), [
             'cpf'         => 'required|unique:cidadaos|max:15',
+            'nome'        => 'required|max:50',
+            'telefone'    => 'max:15',
+            'email'       => 'max:50',
+            'celular'     => 'max:15',
+            'cep'         => 'required|max:8|min:8',
+            'logradouro'  => 'max:50'
+        ]) : Validator::make($request->json()->all(), [
+            'cpf'         => 'required|max:15',
             'nome'        => 'required|max:50',
             'telefone'    => 'max:15',
             'email'       => 'max:50',
@@ -68,29 +51,37 @@ class CidadaoController extends Controller
         else
         {
             try {
-                $client = new Client();
+                $cidadao = !$is_edit ? new Cidadao() : Cidadao::where('cpf','=',$cpf)->first();
+                if(!$cidadao){
+                    $response->status = '400';
+                    $response->code = 'Cidadão não encontrado';
+                    array_push($response->messages, $e->getMessage());
+                    return FacadeResponse::json($response,400);    
+                }
+
                 $result = json_decode(file_get_contents('https://viacep.com.br/ws/'.$request->cep.'/json'), true);//$client->request('GET', 'https://viacep.com.br/ws/79700000/json/');
-                $cidadao = new Cidadao();
-                $cidadao->nome = $request->nome;
-                $cidadao->cpf = $request->cpf;
-                $cidadao->telefone = $request->telefone;
-                $cidadao->email = $request->email;
-                $cidadao->celular = $request->celular;
-                $cidadao->cep = $request->cep;
-                $cidadao->logradouro  = $result['logradouro'];
-                $cidadao->bairro      = $result['bairro'];
-                $cidadao->cidade      = $result['localidade'];
-                $cidadao->uf          = $result['uf'];
+                
+                $cidadao->nome          = $request->nome;
+                $cidadao->cpf           = $request->cpf;
+                $cidadao->telefone      = $request->telefone;
+                $cidadao->email         = $request->email;
+                $cidadao->celular       = $request->celular;
+                $cidadao->cep           = $request->cep;
+                $cidadao->logradouro    = $result['logradouro'] == null ? '' : $result['logradouro'];
+                $cidadao->bairro        = $result['bairro'] == null ? '' : $result['bairro'];
+                $cidadao->cidade        = $result['localidade'] == null ? '' : $result['localidade'];
+                $cidadao->uf            = $result['uf'] == null ? '' : $result['uf'];
                 $cidadao->save();
-                $response = $cidadao;    
+                $response = $cidadao; 
+                $response->code = 200;   
            } catch (Exception $e) {
                 $response->status = '400';
-                $response->code = 'Erro';
+                $response->code = 400;
                 array_push($response->messages, $e->getMessage());
                 
             } catch (ErrorException $e) {
                 $response->status = '400';
-                $response->code = 'Erro';
+                $response->code = 400;
                 array_push($response->messages, $e->getMessage());
             }
     
@@ -100,35 +91,16 @@ class CidadaoController extends Controller
         return FacadeResponse::json($response);    
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Cidadao  $cidadao
-     * @return \Illuminate\Http\Response
-     */
     public function show($cpf)
     {
-        $cidadao = Cidadao::where('cpf','=',$cpf)->get();
-        return response()->json($cidadao);
+        $cidadao = Cidadao::where('cpf','=',$cpf)->first();
+        return response()->json($cidadao,200);
     }
 
     public function delete($cpf)
     {
         $cidadao = Cidadao::where('cpf','=',$cpf)->delete();
         return response()->json('OK');
-    }
-
-    public function edit($cpf){
-        $cidadao = Cidadao::where('cpf','=',$cpf)->get();
-
-        if(count($cidado > 0)){
-            //edit
-        } else {
-            return response()->json('Cidadão não encontrado!');
-        }
-    }
-
-    
-
+    }    
     
 }
