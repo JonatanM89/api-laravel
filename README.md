@@ -1,10 +1,10 @@
 # API
 API básica desenvolvida em LARAVEL
 
-PHP -> 7.2
-MySQL
-LARAVEL -> 6.2
-Para execução da API, seguir os seguintes comandos
+- PHP -> 7.2
+- MySQL
+- LARAVEL -> 6.2
+- Para execução da API, seguir os seguintes comandos
 
 # Install & run (Windows)
  
